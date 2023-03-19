@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:math';
 
 class FlightTask extends StatefulWidget {
   const FlightTask({super.key});
@@ -27,13 +28,55 @@ class Point {
 
 class _FlightTaskState extends State<FlightTask> {
   Future<List<Widget>>? _points;
-  late List<Point> _couples;
+  int mk = 192, msh = 1, g0 = 8, vmx = 2;
 
   @override
   initState() {
     super.initState();
 
     _points = _getPoints();
+  }
+
+  int e(int t) {
+    int ans = 0;
+    for (int i = 0; i <= t; i++) {
+      ans += i;
+    }
+    return ans;
+  }
+
+  z(int dist, double v, int n) {
+    int ans = 0, day = (dist / v).round();
+    int w = (((v * 80 * mk) / (200 * vmx) +
+                (v * 80 * (mk + msh * n)) / (200 * vmx)) /
+            2)
+        .round();
+
+    if (w > 80 || w > day) return [-1];
+    ans += w * 10;
+
+    int kp = (n / (8 * day)).floor();
+    int sum = (acos(-kp) * 40 / pi).floor();
+
+    if (w != 0 && 2 * sum > 60 * n) return [-1];
+    int oxi = 2 * sum;
+    ans += 7 * w * oxi;
+
+    day -= w;
+    int t = 5;
+    oxi = 2 * (sum - t);
+
+    if (oxi > 60 * n) {
+      oxi = 60 * n;
+      t = sum - oxi;
+    }
+
+    if (oxi < 0 || oxi > 60 * n || t > 30 || t < 0) {
+      return [-1];
+    }
+
+    sum *= (oxi * 7 * day + (10 * e(t)) / 11).round();
+    return [ans, oxi, (dist / v).round(), t, n];
   }
 
   Future<List<Widget>> _getPoints() async {
@@ -96,7 +139,87 @@ class _FlightTaskState extends State<FlightTask> {
       );
     }
 
-    _couples = result_points;
+    pointsListText.add(
+      SizedBox(
+        height: 50,
+      ),
+    );
+
+    double v = 2.0;
+    for (; v > 0.0; v -= 0.001) {
+      int dist = result_points[0].distance;
+      int sh = result_points[0].SH + 8;
+
+      int ans = z(dist, v, sh)[0];
+      if (ans != -1) break;
+    }
+
+    print(v);
+
+    pointsListText.add(
+      Text(
+        "Скорость: " + v.toString(),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(fontSize: 20, color: Colors.black),
+      ),
+    );
+
+    pointsListText.add(
+      Text(
+        "Количество затрат: " +
+            z(result_points[0].distance, v, result_points[0].SH + 8)[0]
+                .toString(),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(fontSize: 20, color: Colors.black),
+      ),
+    );
+
+    pointsListText.add(
+      Text(
+        "Количество кислорода: " +
+            z(result_points[0].distance, v, result_points[0].SH + 8)[1]
+                .toString(),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(fontSize: 20, color: Colors.black),
+      ),
+    );
+
+    pointsListText.add(
+      Text(
+        "Время на перелёт: " +
+            z(result_points[0].distance, v, result_points[0].SH + 8)[2]
+                .toString(),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(fontSize: 20, color: Colors.black),
+      ),
+    );
+
+    pointsListText.add(
+      Text(
+        "Температура сейчас: " +
+            z(result_points[0].distance, v, result_points[0].SH + 8)[3]
+                .toString(),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(fontSize: 20, color: Colors.black),
+      ),
+    );
+
+    pointsListText.add(
+      Text(
+        "Единиц SH сейчас: " +
+            z(result_points[0].distance, v, result_points[0].SH + 8)[4]
+                .toString(),
+        maxLines: 2,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(fontSize: 20, color: Colors.black),
+      ),
+    );
+
     return pointsListText;
   }
 

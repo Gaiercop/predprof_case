@@ -16,7 +16,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       home: Scaffold(
         body: Column(
-          children: [FlightTask()],
+          children: [
+            FlightTask(),
+          ],
         ),
       ),
     );
